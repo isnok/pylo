@@ -6,45 +6,51 @@ from commandwrapper import WrapCommand
 
 class LojbanParser:
 
+    """ A wrapper for jbofihe. """
+
     bin_parser = "jbofihe"
-    parser_args = ('', '-t', '-x -b')
+    parser_args = ('', '-ie', '-se' '-t', '-x -b')
+
+    def encode(self, string):
+        return string.replace("'", "\\'").replace("h", "\\'").lower()
 
     def parse(self, inp):
 
         """ Parse the string given. """
 
-        print "Input: %r" % inp
+        results = [ "Input: %r" % inp ]
 
         if type(inp) is str:
             string = inp
         elif type(inp) is list:
             string = " ".join(inp)
 
-        string = string.replace("'", "\\'").replace("h", "\\'").lower()
+        string = self.encode(string)
+        results.append('Parsing: "%s"' % (string.replace('\\',''),))
 
         echo_string = WrapCommand("echo %s" % (string,))
-        cmdstrs = [ "%s %s" % (self.bin_parser, args) for args in self.parser_args ]
 
-        def _exec(cmdstr):
+        def _exec(args):
+            cmdstr = "%s %s" % (self.bin_parser, args)
             cmd = WrapCommand(cmdstr)
             return cmd(echo_string)
 
-        results = map(_exec, cmdstrs)
+        results.extend(map(_exec, self.parser_args))
         return results
 
     def format_nicely(self, results):
         return "\n---\n".join(results)
 
+
 if __name__ == "__main__":
 
     jbo_parser = LojbanParser()
 
-    #jbo_parser.parse("coi")
-
     import argparse
 
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('words', metavar='words', type=str, nargs='*', help='some lojban word')
+    parser.add_argument('words', metavar='words', type=str, nargs='*', help='some lojban word',
+            default="coi rodo .i mi'e jbovlaste ke skami fanva")
     parser.add_argument('-j', '--jbo', dest='source_lang', action='store_const',
                         const='jbo', default='jbo', help='the source language')
 
