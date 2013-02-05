@@ -30,11 +30,11 @@ def detect_wordtypes(words):
 
     return map(detect_wordtype, words)
 
+
 def interpret(valsi, types):
 
     """ Returns a meaning for the given preparsed lojban (hopefully) sentence. """
 
-    return zip(valsi, types)
 
 def nicely(meaning):
 
@@ -57,7 +57,7 @@ def understand_jbo(words):
     valsi = detect_valsi(words)
     types = detect_wordtypes(valsi)
     meaning = interpret(valsi, types)
-    print nicely(meaning)
+    return meaning
 
 
 if __name__ == "__main__":
@@ -66,11 +66,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('word', type=str, nargs='*', help='some lojban word')
-    parser.add_argument('-j', '--jbo', dest='source_lang', action='store_const',
-                    const='jbo', default='jbo',
-                    help='the source language')
+    parser.add_argument('-p', '--parser', nargs=1, help='the language parser to be used')
 
     args = parser.parse_args()
 
     if args.source_lang == 'jbo':
-        understand_jbo(args.word)
+        meaning = understand_jbo(args.word)
+
+        print nicely(meaning)
+
