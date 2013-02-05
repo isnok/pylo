@@ -16,10 +16,17 @@ def detect_wordtypes(words):
 
 
     def detect_wordtype(word):
-        return {
+        ln = len(word)
+        len_detect = {
                 5: "gismu",
                 2: "cmavo",
-            }[len(word)]
+                4: "cmavo",
+            }.get(ln)
+        if len_detect is None:
+            if not ln % 3:
+                len_detect = "rafsi"
+        return len_detect
+
 
     return map(detect_wordtype, words)
 
