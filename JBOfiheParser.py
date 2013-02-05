@@ -9,7 +9,7 @@ class LojbanParser:
     """ A wrapper for jbofihe. """
 
     bin_parser = "jbofihe"
-    parser_args = ('', '-ie', '-se' '-t', '-x -b')
+    parser_args = ('-bt -dd', '-ie', '-sev' '-t', '-x -b')
 
     def encode(self, string):
         return string.replace("'", "\\'").replace("h", "\\'").lower()
@@ -48,9 +48,9 @@ if __name__ == "__main__":
 
     import argparse
 
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='Process some lojban.')
     parser.add_argument('words', metavar='words', type=str, nargs='*', help='some lojban word',
-            default="coi rodo .i mi'e jbovlaste ke skami fanva")
+            default="coi rodo .i mi'e jbovlaste ke skami fanva ke'e")
     parser.add_argument('-j', '--jbo', dest='source_lang', action='store_const',
                         const='jbo', default='jbo', help='the source language')
 
