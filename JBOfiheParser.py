@@ -8,24 +8,38 @@ class LojbanParser:
 
     """ A wrapper for jbofihe. """
 
+    all_chars = ''.join([chr(i) for i in range(128)])
+    jbo_allowed = "ABCDEFGHIJKLMNOPRSTUVXYZabcdefghijklmnoprstuvxyz'. "
+    inp_strip = ''.join(set(all_chars).difference(list(jbo_allowed)))
+
     bin_parser = "jbofihe"
     parser_args = ('-bt -dd', '-ie', '-sev' '-t', '-x -b')
 
-    def encode(self, string):
-        return string.replace("'", "\\'").replace("h", "\\'").lower()
+    def sanitize_input(self, inp):
 
-    def parse(self, inp):
-
-        """ Parse the string given. """
-
-        results = [ "Input: %r" % inp ]
+        """ Turn an input into a sane string. """
 
         if type(inp) is str:
             string = inp
         elif type(inp) is list:
             string = " ".join(inp)
 
-        string = self.encode(string)
+        string = string.strip(self.inp_strip)
+        string = string.replace("'", "\\'")
+        string = string.replace("h", "\\'")
+        #string = string.lower()
+
+        return string
+
+
+    def parse(self, inp):
+
+        """ Parse the input given. """
+
+        results = [ "Input: %r" % inp ]
+
+        string = self.sanitize_input(inp)
+
         results.append('Parsing: "%s"' % (string.replace('\\',''),))
 
         echo_string = WrapCommand("echo %s" % (string,))
