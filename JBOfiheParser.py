@@ -36,24 +36,36 @@ class LojbanParser:
 
         """ Parse the input given. """
 
-        results = [ "Input: %r" % inp ]
-
+        print "Input: %r" % inp
         string = self.sanitize_input(inp)
-
-        results.append('Parsing: "%s"' % (string.replace('\\',''),))
-
+        print 'Parsing: "%s"' % string.replace('\\','')
         echo_string = WrapCommand("echo %s" % (string,))
 
         def _exec(args):
             cmdstr = "%s %s" % (self.bin_parser, args)
             cmd = WrapCommand(cmdstr)
-            return cmd(echo_string)
+            return (args, cmd(echo_string))
 
-        results.extend(map(_exec, self.parser_args))
-        return results
+        return map(_exec, self.parser_args)
+
 
     def format_nicely(self, results):
-        return "\n---\n".join(results)
+        nice = ""
+        for args, result in results:
+            if args == "-x -b":
+                lines = result.split("\n")
+                lines.pop()
+                out = [ [] for _ in range(5) ]
+                for i in range(len(lines) / 5):
+                    section = lines[5*i:5*(i+1)]
+                    for j, line in enumerate(section):
+                        out[j].append(line)
+                out = map("".join, out)
+                nice += "\n---\n%s" % "\n".join(out)
+
+            nice += "\n---\n%s" % result
+
+        return nice
 
 
 if __name__ == "__main__":
@@ -62,16 +74,13 @@ if __name__ == "__main__":
 
     import argparse
 
-    parser = argparse.ArgumentParser(description='Process some lojban.')
-    parser.add_argument('words', metavar='words', type=str, nargs='*', help='some lojban word',
+    cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
+    cmdline_parser.add_argument('words', metavar='words', type=str, nargs='*', help='some lojban word',
             default="coi rodo .i mi'e jbovlaste ke skami fanva ke'e")
-    parser.add_argument('-j', '--jbo', dest='source_lang', action='store_const',
-                        const='jbo', default='jbo', help='the source language')
 
-    args = parser.parse_args()
+    args = cmdline_parser.parse_args()
 
-    if args.source_lang == 'jbo':
-        results = jbo_parser.parse(args.words)
-        print jbo_parser.format_nicely(results)
+    results = jbo_parser.parse(args.words)
+    print jbo_parser.format_nicely(results)
 
 

@@ -7,7 +7,7 @@ from commandwrapper import WrapCommand
 class LojbanParser:
 
     bin_parser = "contrib/parser-3.0.00/parser"
-    parser_args = '-d"*"'
+    parser_args = '' #'-d"*"'
     parse_cmd = WrapCommand("%s %s" % (bin_parser, parser_args))
 
     def parse(self, string):
@@ -22,17 +22,12 @@ if __name__ == "__main__":
 
     jbo_parser = LojbanParser()
 
-    #jbo_parser.parse("coi")
-
     import argparse
 
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('word', type=str, nargs='*', help='some lojban word')
-    parser.add_argument('-j', '--jbo', dest='source_lang', action='store_const',
-                        const='jbo', default='jbo', help='the source language')
+    cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
+    cmdline_parser.add_argument('words', metavar='words', type=str, nargs='*', help='some lojban word',
+            default="coi rodo .i mi'e jbovlaste ke skami fanva ke'e")
 
-    args = parser.parse_args()
+    args = cmdline_parser.parse_args()
 
-    if args.source_lang == 'jbo':
-         print jbo_parser.parse(args.word)
-
+    print jbo_parser.parse(args.words)

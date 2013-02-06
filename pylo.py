@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+""" pylo - a german word play """
 
 
 def detect_valsi(words):
@@ -35,6 +36,7 @@ def interpret(valsi, types):
 
     """ Returns a meaning for the given preparsed lojban (hopefully) sentence. """
 
+    return zip(valsi, types)
 
 def nicely(meaning):
 
@@ -64,14 +66,13 @@ if __name__ == "__main__":
 
     import argparse
 
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('word', type=str, nargs='*', help='some lojban word')
-    parser.add_argument('-p', '--parser', nargs=1, help='the language parser to be used')
+    cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
+    cmdline_parser.add_argument('words', metavar='words', type=str, nargs='*', help='some lojban word',
+            default="coi rodo .i mi'e jbovlaste ke skami fanva ke'e")
 
-    args = parser.parse_args()
+    args = cmdline_parser.parse_args()
 
-    if args.source_lang == 'jbo':
-        meaning = understand_jbo(args.word)
+    meaning = understand_jbo(args.words)
 
-        print nicely(meaning)
+    print nicely(meaning)
 
