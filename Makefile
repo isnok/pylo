@@ -1,10 +1,14 @@
 ##
 # The first version of pylo.
-# With a Makefile.
-#
+# With a Makefile to install
+# the dependencies.
 ##
 
-all: parser-3.0.00
+all: parser-3.0.00 jbofihe
+
+jbofihe:
+	aptitude install jbofihe ||\
+	apt-get install jbofihe
 
 parser-3.0.00: contrib/parser-3.0.00
 	$(MAKE) -C contrib/$@
@@ -20,4 +24,4 @@ contrib:
 
 
 
-.PHONY : #all
+.PHONY : all
