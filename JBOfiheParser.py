@@ -60,7 +60,19 @@ class LojbanParser:
             for i in xb_out:
                 print i
 
-        print xb_out[0]
+        t_out = self.parse_t(string)
+
+
+    def parse_t(self, lojban):
+
+        fihe_out = run_jbofihe("-t", lojban)
+
+        sentence_level = fihe_out.find("+")
+
+        for l in fihe_out.split("\n")[::-1]:
+            sentence_level = fihe_out.find("+")
+
+            print "%3d: %s" % (l.find("+"), l)
 
 
     def parse_xb(self, lojban):
