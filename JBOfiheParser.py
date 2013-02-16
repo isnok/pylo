@@ -23,7 +23,7 @@ class LojbanParser:
 
     all_chars = ''.join([chr(i) for i in range(128)])
     jbo_allowed = "ABCDEFGHIJKLMNOPRSTUVXYZabcdefghijklmnoprstuvxyz'. "
-    inp_strip = ''.join(set(all_chars).difference(list(jbo_allowed)))
+    inp_strip = set(all_chars).difference(list(jbo_allowed))
 
     def sanitize_input(self, inp):
 
@@ -34,7 +34,9 @@ class LojbanParser:
         elif type(inp) is list:
             string = " ".join(inp)
 
-        string = string.strip(self.inp_strip)
+        for c in self.inp_strip:
+            string = string.replace(c, "")
+
         string = string.replace("'", "\\'")
         string = string.replace("h", "\\'")
         #string = string.lower()
@@ -84,7 +86,7 @@ class LojbanParser:
     def translate(self, tree, indent="", do_indent=False):
 
         def ignore(block):
-            ignoreblocks = ("FREE_VOCATIVE", "TEXT", "CHUNKS", "SUMTI", "SELBRI")
+            ignoreblocks = ("FREE_VOCATIVE", "TEXT", "CHUNKS", "SUMTI", "SELBRI", "TERMS", "CMENE_SEQ")
             for ign in ignoreblocks:
                 if ign in block:
                     return True
@@ -105,7 +107,10 @@ class LojbanParser:
                     words = words.split().pop(0)
                 if words == "i": # gr. is it a bug?
                     words = ".i"
-                if words in valsi_dict:
+                if block == "CMENE":
+                    do_indent = True
+                    fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, words)
+                elif words in valsi_dict:
                     do_indent = True
                     fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, valsi_dict[words].trans)
                 elif words[:3] in rafsi_dict or words[:4] in rafsi_dict:
