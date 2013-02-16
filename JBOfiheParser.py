@@ -61,8 +61,22 @@ class LojbanParser:
                 print i
 
         t_out = self.parse_t(string)
-        import pprint
-        pprint.pprint(t_out)
+        if self.verbose:
+            def out_t(tree, indent=""):
+                fmt = ""
+                for n in tree:
+                    if type(n[1]) is str:
+                        fmt = "%s\n%s %s - %s" % (fmt, indent, n[0], n[1])
+                        continue
+                    newindent = indent + "  "
+                    fmt = "%s\n%s %s%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
+                    #newindent = indent + (" " * (1 + len(n[0])))
+                    #fmt = "%s\n%s %s\n%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
+                return fmt
+            print out_t([t_out])
+        #import MetaTree
+        #MetaTree.NodeTree(t_out).pprint()
+
 
 
     def parse_t(self, lojban):
@@ -93,7 +107,7 @@ class LojbanParser:
                     continue
                 elif line[level] == "|":
                     result.append((typ, dive(tree)))
-            return result
+            return result[::-1]
 
         return dive(fihe_tree)
 

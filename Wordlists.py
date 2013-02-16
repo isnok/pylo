@@ -49,7 +49,7 @@ gismu = map(parse_gismu, gismu_unparsed)
 if __name__ == "__main__":
 
     for idx, g in enumerate(gismu):
-        print "%4d: %-5s - %-12s - %s" % (idx, g.valsi, " ".join(g.rafsi), g.gloss)
+        print "%4d: %-5s - %-12s - %s" % (idx, g.valsi, " ".join(g.rafsi), g.trans)
 
 
 
