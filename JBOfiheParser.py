@@ -94,8 +94,12 @@ class LojbanParser:
             if type(words) is str:
                 if " " in words:
                     words = words.split().pop(0)
+                if words == "i": # gr. is it a bug?
+                    words = ".i"
                 if words in valsi_dict:
                     fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, valsi_dict[words].trans)
+                elif words[:3] in valsi_dict or words[:4] in valsi_dict:
+                    fmt = "%s\n%s %s - %s : lujvo" % (fmt, indent, block, words)#, valsi_dict[words].trans)
                 else:
                     if not ignore(block):
                         do_indent = True

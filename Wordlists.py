@@ -87,9 +87,43 @@ cmavo_version = cmavo_unparsed.pop(0).strip()
 print "Cmavo file version: %s" % cmavo_version.split()[0]
 
 cmavo = map(parse_cmavo, cmavo_unparsed)
+
+##
+#  rafsi.txt
+##
+
+rafsi_file = os.path.sep.join((folder, "rafsi.txt"))
+
+print "Reading rafsi file: %s" % rafsi_file
+rafsi_unparsed = [ line.strip() for line in open(rafsi_file, "r") ]
+
+from collections import namedtuple
+Rafsi = namedtuple("Rafsi", ["valsi", "gismu", "gloss", "trans"])
+
+def parse_rafsi(line):
+
+    valsi = line[:5].strip()
+    line = line[5:]
+
+    gism = line[:6].strip().split()
+    line = line[6:]
+
+    gloss = trans = line.strip()
+
+    rafsi = Rafsi(valsi, gism, gloss, trans)
+
+    valsi_dict[valsi] = rafsi
+    return rafsi
+
+
+rafsi_version = rafsi_unparsed.pop(0).strip()
+print "Rafsi file version: %s" % rafsi_version.split()[0]
+
+rafsi = map(parse_rafsi, rafsi_unparsed)
+
 if __name__ == "__main__":
 
-    for idx, g in enumerate(cmavo):
+    for idx, g in enumerate(rafsi):
         print "%4d: %-5s - %-12s - %s" % (idx, g.valsi, g.gloss, g.trans)
 
 
