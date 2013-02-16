@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
     cmdline_parser.add_argument('words', metavar='word', type=str, nargs='*', help='some lojban word',
-            default="coi rodo .i mi'e jbovlaste ke skami fanva ke'e")
+            default="coi rodo .i mi'e jbovla ke skami fanva ke'e")
 
     args = cmdline_parser.parse_args()
 
