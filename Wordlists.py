@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """ A parser for the official wordlists. """
 
-valsi_dict = {} # the current purpose of the module
+valsi_dict = {}
+rafsi_dict = {}
 
 import os
 
@@ -112,7 +113,7 @@ def parse_rafsi(line):
 
     rafsi = Rafsi(valsi, gism, gloss, trans)
 
-    valsi_dict[valsi] = rafsi
+    rafsi_dict[valsi] = rafsi
     return rafsi
 
 

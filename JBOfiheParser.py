@@ -5,6 +5,7 @@
 from commandwrapper import WrapCommand
 
 from Wordlists import valsi_dict
+from Wordlists import rafsi_dict
 
 def run_jbofihe(args, lojban):
     """ In order to pipe correctly we have to use two commandline wrappers. """
@@ -97,9 +98,11 @@ class LojbanParser:
                 if words == "i": # gr. is it a bug?
                     words = ".i"
                 if words in valsi_dict:
+                    do_indent = True
                     fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, valsi_dict[words].trans)
-                elif words[:3] in valsi_dict or words[:4] in valsi_dict:
-                    fmt = "%s\n%s %s - %s : lujvo" % (fmt, indent, block, words)#, valsi_dict[words].trans)
+                elif words[:3] in rafsi_dict or words[:4] in rafsi_dict:
+                    do_indent = True
+                    fmt = "%s\n%s %s - %s : lujvo" % (fmt, indent, block, words)
                 else:
                     if not ignore(block):
                         do_indent = True
