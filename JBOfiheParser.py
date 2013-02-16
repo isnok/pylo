@@ -4,16 +4,25 @@
 
 from commandwrapper import WrapCommand
 
+from Wordlists import valsi_dict
+
+def run_jbofihe(args, lojban):
+    """ In order to pipe correctly we have to use two commandline wrappers. """
+    echo = WrapCommand("echo %s" % lojban)
+    cmd = WrapCommand("jbofihe %s" % args)
+    return cmd(echo)
+
+
+
 class LojbanParser:
 
     """ A wrapper for jbofihe. """
 
+    verbose = True
+
     all_chars = ''.join([chr(i) for i in range(128)])
     jbo_allowed = "ABCDEFGHIJKLMNOPRSTUVXYZabcdefghijklmnoprstuvxyz'. "
     inp_strip = ''.join(set(all_chars).difference(list(jbo_allowed)))
-
-    bin_parser = "jbofihe"
-    parser_args = ('-bt -dd', '-ie', '-sev' '-t', '-x -b')
 
     def sanitize_input(self, inp):
 
@@ -36,40 +45,40 @@ class LojbanParser:
 
         """ Parse the input given. """
 
-        print "Input: %r" % inp
+        if self.verbose:
+            print "Input: %r" % inp
+
         string = self.sanitize_input(inp)
-        print 'Parsing: "%s"' % string.replace('\\','')
-        echo_string = WrapCommand("echo %s" % (string,))
 
-        def _exec(args):
-            cmdstr = "%s %s" % (self.bin_parser, args)
-            cmd = WrapCommand(cmdstr)
-            return (args, cmd(echo_string))
+        if self.verbose:
+            print 'Parsing: "%s"' % string.replace('\\','')
 
-        return map(_exec, self.parser_args)
+        xb_out = self.parse_xb(string)
+
+        if self.verbose:
+            print "Output of 'jbofihe -x -b':"
+            for i in xb_out:
+                print i
+
+        print xb_out[0]
 
 
-    def format_nicely(self, results):
-        nice = ""
-        for args, result in results:
-            if args == "-x -b":
-                lines = result.split("\n")
-                lines.pop()
-                out = [ [] for _ in range(5) ]
-                for i in range(len(lines) / 5):
-                    section = lines[5*i:5*(i+1)]
-                    for j, line in enumerate(section):
-                        out[j].append(line)
-                out = map("".join, out)
-                nice += "\n---\n%s" % "\n".join(out)
+    def parse_xb(self, lojban):
 
-            nice += "\n---\n%s" % result
-
-        return nice
+        fihe_out = run_jbofihe("-x -b", lojban)
+        lines = fihe_out.split("\n")
+        lines.pop()
+        out = map(lambda _: [], range(5))
+        for i in range(len(lines) / 5):
+            section = lines[5*i:5*(i+1)]
+            for j, line in enumerate(section):
+                out[j].append(line)
+        return map("".join, out)
 
 
 if __name__ == "__main__":
 
+    #parser_args = ('-bt -dd', '-ie', '-sev' '-t', '-x -b')
     jbo_parser = LojbanParser()
 
     import argparse
@@ -80,7 +89,4 @@ if __name__ == "__main__":
 
     args = cmdline_parser.parse_args()
 
-    results = jbo_parser.parse(args.words)
-    print jbo_parser.format_nicely(results)
-
-
+    jbo_parser.parse(args.words)
