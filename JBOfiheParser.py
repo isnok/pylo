@@ -90,6 +90,14 @@ class LojbanParser:
                     return True
             return False
 
+        def pop_rafsi(valsi):
+            if not valsi:
+                return ()
+            if valsi[:3] in rafsi_dict:
+                return (rafsi_dict[valsi[:3]],) + pop_rafsi(valsi[3:])
+            if valsi[:4] in rafsi_dict:
+                return (rafsi_dict[valsi[:4]],) + pop_rafsi(valsi[4:])
+
         fmt = ""
         for block, words in tree:
             if type(words) is str:
@@ -102,7 +110,8 @@ class LojbanParser:
                     fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, valsi_dict[words].trans)
                 elif words[:3] in rafsi_dict or words[:4] in rafsi_dict:
                     do_indent = True
-                    fmt = "%s\n%s %s - %s : lujvo" % (fmt, indent, block, words)
+                    trans = "-".join([r.trans for r in pop_rafsi(words)])
+                    fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, trans)
                 else:
                     if not ignore(block):
                         do_indent = True
