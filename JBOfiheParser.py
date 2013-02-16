@@ -61,18 +61,41 @@ class LojbanParser:
                 print i
 
         t_out = self.parse_t(string)
+        import pprint
+        pprint.pprint(t_out)
 
 
     def parse_t(self, lojban):
 
         fihe_out = run_jbofihe("-t", lojban)
 
-        sentence_level = fihe_out.find("+")
+        fihe_tree = fihe_out.split("\n")[::-1]
+        fihe_tree.pop(0)
 
-        for l in fihe_out.split("\n")[::-1]:
-            sentence_level = fihe_out.find("+")
+        def dive(tree):
 
-            print "%3d: %s" % (l.find("+"), l)
+            level = tree[0].find("+")
+
+            if level == -1:
+                chunks = tree.pop(0)
+                return (chunks, dive(tree))
+
+            result = []
+            while tree and tree[0][level] in ("+", "|"):
+                line = tree[0]
+                if line[level] == "+":
+                    line =line[level+2:]
+                    if ":" in line:
+                        t, d = line.split(":")
+                        result.append((t.strip(), d.strip()))
+                    typ = line
+                    tree.pop(0)
+                    continue
+                elif line[level] == "|":
+                    result.append((typ, dive(tree)))
+            return result
+
+        return dive(fihe_tree)
 
 
     def parse_xb(self, lojban):
