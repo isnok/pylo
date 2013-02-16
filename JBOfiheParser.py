@@ -61,7 +61,7 @@ class LojbanParser:
                 print i
 
         t_out = self.parse_t(string)
-        if self.verbose:
+        if self.verbose > 1:
             def out_t(tree, indent=""):
                 fmt = ""
                 for n in tree:
@@ -74,9 +74,44 @@ class LojbanParser:
                     #fmt = "%s\n%s %s\n%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
                 return fmt
             print out_t([t_out])
+
+        print self.translate([t_out])
         #import MetaTree
         #MetaTree.NodeTree(t_out).pprint()
 
+
+    def translate(self, tree, indent="", do_indent=False):
+
+        def ignore(block):
+            ignoreblocks = ("FREE_VOCATIVE", "TEXT", "CHUNKS", "SUMTI", "SELBRI")
+            for ign in ignoreblocks:
+                if ign in block:
+                    return True
+            return False
+
+        fmt = ""
+        for block, words in tree:
+            if type(words) is str:
+                if " " in words:
+                    words = words.split().pop(0)
+                if words in valsi_dict:
+                    fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, valsi_dict[words].trans)
+                else:
+                    if not ignore(block):
+                        do_indent = True
+                        fmt = "%s\n%s %s - %s" % (fmt, indent, block, words)
+                continue
+            newindent = indent
+            if do_indent:
+                newindent = indent + "  "
+            if not ignore(block):
+                do_indent = True
+                fmt = "%s\n%s %s%s %s" % (fmt, indent, block, indent, self.translate(words, newindent, do_indent))
+            else:
+                fmt = "%s%s" % (fmt, self.translate(words, newindent, do_indent))
+            #newindent = indent + (" " * (1 + len(n[0])))
+            #fmt = "%s\n%s %s\n%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
+        return fmt
 
 
     def parse_t(self, lojban):
