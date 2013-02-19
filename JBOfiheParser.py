@@ -123,10 +123,10 @@ class LojbanParser:
                 continue
             newindent = indent
             if do_indent:
-                newindent = indent + "  "
+                newindent += "  "
             if not ignore(block):
                 do_indent = True
-                fmt = "%s\n%s %s%s %s" % (fmt, indent, block, indent, self.translate(words, newindent, do_indent))
+                fmt = "%s\n%s %s%s %s" % (fmt, indent, block, indent, self.translate(words, newindent, False))
             else:
                 fmt = "%s%s" % (fmt, self.translate(words, newindent, do_indent))
             #newindent = indent + (" " * (1 + len(n[0])))
