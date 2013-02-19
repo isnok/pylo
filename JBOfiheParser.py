@@ -79,8 +79,6 @@ class LojbanParser:
             print out_t([t_out])
 
         print self.translate([t_out])
-        #import MetaTree
-        #MetaTree.NodeTree(t_out).pprint()
 
 
     def translate(self, tree, indent="", do_indent=False):
@@ -112,11 +110,11 @@ class LojbanParser:
                     fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, words)
                 elif words in valsi_dict:
                     do_indent = True
-                    fmt = "%s\n%s %-5s : (%s) %s" % (fmt, indent, words, block.lower(), valsi_dict[words].trans)
+                    fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), valsi_dict[words].trans)
                 elif words[:3] in rafsi_dict or words[:4] in rafsi_dict:
                     do_indent = True
                     trans = "-".join([r.trans for r in pop_rafsi(words)])
-                    fmt = "%s\n%s %s : (%s) %s" % (fmt, indent, words, block.lower(), trans)
+                    fmt = "%s\n%s %s (%s) : %s" % (fmt, indent, words, block.lower(), trans)
                 else:
                     if not ignore(block):
                         do_indent = True
