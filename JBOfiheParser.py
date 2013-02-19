@@ -84,7 +84,7 @@ class LojbanParser:
     def translate(self, tree, indent="", do_indent=False):
 
         def ignore(block):
-            ignoreblocks = ("FREE_VOCATIVE", "TEXT", "CHUNKS", "SUMTI", "SELBRI", "TERMS", "CMENE_SEQ")
+            ignoreblocks = ("FREE_VOCATIVE", "TEXT", "CHUNKS", "SUMTI", "SELBRI", "TERMS", "CMENE_SEQ", "AUGMENTED")
             for ign in ignoreblocks:
                 if ign in block:
                     return True
@@ -103,18 +103,19 @@ class LojbanParser:
             if type(words) is str:
                 if " " in words:
                     words = words.split().pop(0)
-                if words == "i": # gr. is it a bug?
-                    words = ".i"
                 if block == "CMENE":
                     do_indent = True
-                    fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, words)
+                    fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), words)
                 elif words in valsi_dict:
                     do_indent = True
                     fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), valsi_dict[words].trans)
+                elif (".%s" % words) in valsi_dict:
+                    do_indent = True
+                    fmt = "%s\n%s .%-4s (%s) : %s" % (fmt, indent, words, block.lower(), valsi_dict[".%s"%words].trans)
                 elif words[:3] in rafsi_dict or words[:4] in rafsi_dict:
                     do_indent = True
                     trans = "-".join([r.trans for r in pop_rafsi(words)])
-                    fmt = "%s\n%s %s (%s) : %s" % (fmt, indent, words, block.lower(), trans)
+                    fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), trans)
                 else:
                     if not ignore(block):
                         do_indent = True
