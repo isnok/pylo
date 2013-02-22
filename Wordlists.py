@@ -6,7 +6,7 @@ rafsi_dict = {}
 
 import os
 
-# as packaged in debian
+# as packaged in debian (in lojban-common)
 folder = os.path.sep.join(("", "usr", "share", "lojban"))
 
 ##
@@ -122,7 +122,3 @@ if __name__ == "__main__":
 
     for idx, g in enumerate(rafsi):
         print "%4d: %-5s - %-12s - %s" % (idx, g.valsi, g.gloss, g.trans)
-
-
-
-

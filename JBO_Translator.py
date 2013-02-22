@@ -1,4 +1,3 @@
-
 from Wordlists import valsi_dict
 from Wordlists import rafsi_dict
 
@@ -13,13 +12,15 @@ class JBOTranslator:
                     return True
             return False
 
-        def pop_rafsi(valsi):
-            if not valsi:
-                return ()
-            if valsi[:3] in rafsi_dict:
-                return (rafsi_dict[valsi[:3]],) + pop_rafsi(valsi[3:])
-            if valsi[:4] in rafsi_dict:
-                return (rafsi_dict[valsi[:4]],) + pop_rafsi(valsi[4:])
+        def pop_rafsi(valsi, rafsi_len):
+            rafsi, rest = rafsi_dict[valsi[:rafsi_len]], valsi[rafsi_len:]
+            if not rest:
+                return (rafsi,)
+            elif rest[:3] in rafsi_dict:
+                next_len = 3
+            elif rest[:4] in rafsi_dict:
+                next_len = 4
+            return (rafsi,) + pop_rafsi(rest, next_len)
 
         fmt = ""
         for block, words in tree:
@@ -34,9 +35,13 @@ class JBOTranslator:
                 elif words in valsi_dict:
                     do_indent = True
                     fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), valsi_dict[words].trans)
-                elif words[:3] in rafsi_dict or words[:4] in rafsi_dict:
+                elif words[:3] in rafsi_dict:
                     do_indent = True
-                    trans = "-".join([r.trans for r in pop_rafsi(words)])
+                    trans = "-".join([r.trans for r in pop_rafsi(words, 3)])
+                    fmt = "%s\n%s %s (%s) : %s" % (fmt, indent, words, block.lower(), trans)
+                elif words[:4] in rafsi_dict:
+                    do_indent = True
+                    trans = "-".join([r.trans for r in pop_rafsi(words, 4)])
                     fmt = "%s\n%s %s (%s) : %s" % (fmt, indent, words, block.lower(), trans)
                 else:
                     if not ignore(block):
