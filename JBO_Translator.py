@@ -16,6 +16,8 @@ class JBOTranslator:
             rafsi, rest = rafsi_dict[valsi[:rafsi_len]], valsi[rafsi_len:]
             if not rest:
                 return (rafsi,)
+            if rest[0] in "y'":
+                rest = rest[0:]
             elif rest[:3] in rafsi_dict:
                 next_len = 3
             elif rest[:4] in rafsi_dict:
