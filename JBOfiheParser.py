@@ -2,44 +2,14 @@
 
 """ A wrapper for the jbofihe parser. """
 
-from commandwrapper import WrapCommand
-
-def run_jbofihe(args, lojban):
-    """ In order to pipe correctly we have to use two commandline wrappers. """
-    echo = WrapCommand("echo %s" % lojban)
-    cmd = WrapCommand("jbofihe %s" % args)
-    return cmd(echo)
-
-
+from Helpers import run_jbofihe
+from Helpers import sanitize_input
 
 class LojbanParser:
 
     """ A wrapper for jbofihe. """
 
-    verbose = True
-
-    all_chars = ''.join([chr(i) for i in range(128)])
-    jbo_allowed = "ABCDEFGHIJKLMNOPRSTUVXYZabcdefghijklmnoprstuvxyz'. "
-    inp_strip = set(all_chars).difference(list(jbo_allowed))
-
-    def sanitize_input(self, inp):
-
-        """ Turn an input into a sane string. """
-
-        if type(inp) is str:
-            string = inp
-        elif type(inp) is list:
-            string = " ".join(inp)
-
-        for c in self.inp_strip:
-            string = string.replace(c, "")
-
-        string = string.replace("'", "\\'")
-        string = string.replace("h", "\\'")
-        #string = string.lower()
-
-        return string
-
+    verbose = 0
 
     def parse(self, inp):
 
@@ -51,7 +21,7 @@ class LojbanParser:
         if self.verbose:
             print "Input: %r" % inp
 
-        string = self.sanitize_input(inp)
+        string = sanitize_input(inp)
 
         if self.verbose:
             print 'Parsing: "%s"' % string.replace('\\','')
@@ -133,7 +103,7 @@ if __name__ == "__main__":
     import argparse
     cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
     cmdline_parser.add_argument('words', metavar='word', type=str, nargs='*', help='some lojban word',
-            default="coi rodo .i mi'e jbovla ke skami fanva ke'e")
+            default="coi rodo .i mihe jbovla ke skami fanva kehe")
     cmdline_parser.add_argument('--verbose', '-v', action="count", default=0, help='verbosity, -vv and -vvv are valid')
     args = cmdline_parser.parse_args()
 
