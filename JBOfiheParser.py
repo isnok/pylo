@@ -4,9 +4,6 @@
 
 from commandwrapper import WrapCommand
 
-from Wordlists import valsi_dict
-from Wordlists import rafsi_dict
-
 def run_jbofihe(args, lojban):
     """ In order to pipe correctly we have to use two commandline wrappers. """
     echo = WrapCommand("echo %s" % lojban)
@@ -78,65 +75,14 @@ class LojbanParser:
                 return fmt
             print out_t([t_out])
 
-        print self.translate([t_out])
-
-
-    def translate(self, tree, indent="", do_indent=False):
-
-        def ignore(block):
-            ignoreblocks = ("FREE_VOCATIVE", "TEXT", "CHUNKS", "SUMTI", "SELBRI", "TERMS", "CMENE_SEQ")
-            for ign in ignoreblocks:
-                if ign in block:
-                    return True
-            return False
-
-        def pop_rafsi(valsi):
-            if not valsi:
-                return ()
-            if valsi[:3] in rafsi_dict:
-                return (rafsi_dict[valsi[:3]],) + pop_rafsi(valsi[3:])
-            if valsi[:4] in rafsi_dict:
-                return (rafsi_dict[valsi[:4]],) + pop_rafsi(valsi[4:])
-
-        fmt = ""
-        for block, words in tree:
-            if type(words) is str:
-                if " " in words:
-                    words = words.split().pop(0)
-                if words == "i": # gr. is it a bug?
-                    words = ".i"
-                if block == "CMENE":
-                    do_indent = True
-                    fmt = "%s\n%s %s - %s : %s" % (fmt, indent, block, words, words)
-                elif words in valsi_dict:
-                    do_indent = True
-                    fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), valsi_dict[words].trans)
-                elif words[:3] in rafsi_dict or words[:4] in rafsi_dict:
-                    do_indent = True
-                    trans = "-".join([r.trans for r in pop_rafsi(words)])
-                    fmt = "%s\n%s %s (%s) : %s" % (fmt, indent, words, block.lower(), trans)
-                else:
-                    if not ignore(block):
-                        do_indent = True
-                        fmt = "%s\n%s %s - %s" % (fmt, indent, block, words)
-                continue
-            newindent = indent
-            if do_indent:
-                newindent = indent + "  "
-            if not ignore(block):
-                do_indent = True
-                fmt = "%s\n%s %s%s %s" % (fmt, indent, block, indent, self.translate(words, newindent, do_indent))
-            else:
-                fmt = "%s%s" % (fmt, self.translate(words, newindent, do_indent))
-            #newindent = indent + (" " * (1 + len(n[0])))
-            #fmt = "%s\n%s %s\n%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
-        return fmt
-
+        return t_out
 
     def parse_t(self, lojban):
 
         fihe_out = run_jbofihe("-t", lojban)
 
+        # it's easier to determine the indentation
+        # level if we parse the output backwards
         fihe_tree = fihe_out.split("\n")[::-1]
         fihe_tree.pop(0)
 
@@ -161,7 +107,7 @@ class LojbanParser:
                     continue
                 elif line[level] == "|":
                     result.append((typ, dive(tree)))
-            return result[::-1]
+            return result[::-1] # back from backwards parsing
 
         return dive(fihe_tree)
 
@@ -185,6 +131,7 @@ if __name__ == "__main__":
     jbo_parser = LojbanParser()
 
     import argparse
+    from JBO_Translator import JBOTranslator
 
     cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
     cmdline_parser.add_argument('words', metavar='word', type=str, nargs='*', help='some lojban word',
@@ -192,4 +139,8 @@ if __name__ == "__main__":
 
     args = cmdline_parser.parse_args()
 
-    jbo_parser.parse(args.words)
+    parsed = jbo_parser.parse(args.words)
+
+    print JBOTranslator().translate([parsed])
+
+
