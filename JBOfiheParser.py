@@ -45,6 +45,9 @@ class LojbanParser:
 
         """ Parse the input given. """
 
+        # old list of "interesting jbofihe args:"
+        #parser_args = ('-bt -dd', '-ie', '-sev' '-t', '-x -b')
+
         if self.verbose:
             print "Input: %r" % inp
 
@@ -73,7 +76,7 @@ class LojbanParser:
                     #newindent = indent + (" " * (1 + len(n[0])))
                     #fmt = "%s\n%s %s\n%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
                 return fmt
-            print out_t([t_out])
+            print out_t(t_out)
 
         return t_out
 
@@ -92,7 +95,7 @@ class LojbanParser:
 
             if level == -1:
                 chunks = tree.pop(0)
-                return (chunks, dive(tree))
+                return [(chunks, dive(tree))]
 
             result = []
             while tree and tree[0][level] in ("+", "|"):
@@ -127,20 +130,19 @@ class LojbanParser:
 
 if __name__ == "__main__":
 
-    #parser_args = ('-bt -dd', '-ie', '-sev' '-t', '-x -b')
-    jbo_parser = LojbanParser()
-
     import argparse
-    from JBO_Translator import JBOTranslator
-
     cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
     cmdline_parser.add_argument('words', metavar='word', type=str, nargs='*', help='some lojban word',
             default="coi rodo .i mi'e jbovla ke skami fanva ke'e")
-
+    cmdline_parser.add_argument('--verbose', '-v', action="count", default=0, help='verbosity, -vv and -vvv are valid')
     args = cmdline_parser.parse_args()
 
+    jbo_parser = LojbanParser()
+    jbo_parser.verbose = args.verbose
     parsed = jbo_parser.parse(args.words)
 
-    print JBOTranslator().translate([parsed])
+    from JBO_Translator import JBOTranslator
+
+    print JBOTranslator().translate(parsed)
 
 
