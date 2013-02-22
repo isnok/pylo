@@ -116,10 +116,6 @@ def parse_rafsi(line):
     rafsi_dict[valsi] = rafsi
     return rafsi
 
-
-rafsi_version = rafsi_unparsed.pop(0).strip()
-print "Rafsi file version: %s" % rafsi_version.split()[0]
-
 rafsi = map(parse_rafsi, rafsi_unparsed)
 
 if __name__ == "__main__":
