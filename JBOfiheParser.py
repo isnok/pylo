@@ -2,56 +2,26 @@
 
 """ A wrapper for the jbofihe parser. """
 
-from commandwrapper import WrapCommand
-
-from Wordlists import valsi_dict
-from Wordlists import rafsi_dict
-
-def run_jbofihe(args, lojban):
-    """ In order to pipe correctly we have to use two commandline wrappers. """
-    echo = WrapCommand("echo %s" % lojban)
-    cmd = WrapCommand("jbofihe %s" % args)
-    return cmd(echo)
-
-
+from Helpers import run_jbofihe
+from Helpers import sanitize_input
 
 class LojbanParser:
 
     """ A wrapper for jbofihe. """
 
-    verbose = True
-
-    all_chars = ''.join([chr(i) for i in range(128)])
-    jbo_allowed = "ABCDEFGHIJKLMNOPRSTUVXYZabcdefghijklmnoprstuvxyz'. "
-    inp_strip = set(all_chars).difference(list(jbo_allowed))
-
-    def sanitize_input(self, inp):
-
-        """ Turn an input into a sane string. """
-
-        if type(inp) is str:
-            string = inp
-        elif type(inp) is list:
-            string = " ".join(inp)
-
-        for c in self.inp_strip:
-            string = string.replace(c, "")
-
-        string = string.replace("'", "\\'")
-        string = string.replace("h", "\\'")
-        #string = string.lower()
-
-        return string
-
+    verbose = 0
 
     def parse(self, inp):
 
         """ Parse the input given. """
 
+        # old list of "interesting jbofihe args:"
+        #parser_args = ('-bt -dd', '-ie', '-sev' '-t', '-x -b')
+
         if self.verbose:
             print "Input: %r" % inp
 
-        string = self.sanitize_input(inp)
+        string = sanitize_input(inp)
 
         if self.verbose:
             print 'Parsing: "%s"' % string.replace('\\','')
@@ -76,68 +46,16 @@ class LojbanParser:
                     #newindent = indent + (" " * (1 + len(n[0])))
                     #fmt = "%s\n%s %s\n%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
                 return fmt
-            print out_t([t_out])
+            print out_t(t_out)
 
-        print self.translate([t_out])
-
-
-    def translate(self, tree, indent="", do_indent=False):
-
-        def ignore(block):
-            ignoreblocks = ("FREE_VOCATIVE", "TEXT", "CHUNKS", "SUMTI", "SELBRI", "TERMS", "CMENE_SEQ", "AUGMENTED")
-            for ign in ignoreblocks:
-                if ign in block:
-                    return True
-            return False
-
-        def pop_rafsi(valsi):
-            if not valsi:
-                return ()
-            if valsi[:3] in rafsi_dict:
-                return (rafsi_dict[valsi[:3]],) + pop_rafsi(valsi[3:])
-            if valsi[:4] in rafsi_dict:
-                return (rafsi_dict[valsi[:4]],) + pop_rafsi(valsi[4:])
-
-        fmt = ""
-        for block, words in tree:
-            if type(words) is str:
-                if " " in words:
-                    words = words.split().pop(0)
-                if block == "CMENE":
-                    do_indent = True
-                    fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), words)
-                elif words in valsi_dict:
-                    do_indent = True
-                    fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), valsi_dict[words].trans)
-                elif (".%s" % words) in valsi_dict:
-                    do_indent = True
-                    fmt = "%s\n%s .%-4s (%s) : %s" % (fmt, indent, words, block.lower(), valsi_dict[".%s"%words].trans)
-                elif words[:3] in rafsi_dict or words[:4] in rafsi_dict:
-                    do_indent = True
-                    trans = "-".join([r.trans for r in pop_rafsi(words)])
-                    fmt = "%s\n%s %-5s (%s) : %s" % (fmt, indent, words, block.lower(), trans)
-                else:
-                    if not ignore(block):
-                        do_indent = True
-                        fmt = "%s\n%s %s - %s" % (fmt, indent, block, words)
-                continue
-            newindent = indent
-            if do_indent:
-                newindent += "  "
-            if not ignore(block):
-                do_indent = True
-                fmt = "%s\n%s %s%s %s" % (fmt, indent, block, indent, self.translate(words, newindent, False))
-            else:
-                fmt = "%s%s" % (fmt, self.translate(words, newindent, do_indent))
-            #newindent = indent + (" " * (1 + len(n[0])))
-            #fmt = "%s\n%s %s\n%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
-        return fmt
-
+        return t_out
 
     def parse_t(self, lojban):
 
         fihe_out = run_jbofihe("-t", lojban)
 
+        # it's easier to determine the indentation
+        # level if we parse the output backwards
         fihe_tree = fihe_out.split("\n")[::-1]
         fihe_tree.pop(0)
 
@@ -147,7 +65,7 @@ class LojbanParser:
 
             if level == -1:
                 chunks = tree.pop(0)
-                return (chunks, dive(tree))
+                return [(chunks, dive(tree))]
 
             result = []
             while tree and tree[0][level] in ("+", "|"):
@@ -162,7 +80,7 @@ class LojbanParser:
                     continue
                 elif line[level] == "|":
                     result.append((typ, dive(tree)))
-            return result[::-1]
+            return result[::-1] # back from backwards parsing
 
         return dive(fihe_tree)
 
@@ -182,15 +100,19 @@ class LojbanParser:
 
 if __name__ == "__main__":
 
-    #parser_args = ('-bt -dd', '-ie', '-sev' '-t', '-x -b')
-    jbo_parser = LojbanParser()
-
     import argparse
-
     cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
     cmdline_parser.add_argument('words', metavar='word', type=str, nargs='*', help='some lojban word',
-            default="coi rodo .i mi'e jbovla ke skami fanva ke'e")
-
+            default="coi rodo .i mihe jbovla ke skami fanva kehe")
+    cmdline_parser.add_argument('--verbose', '-v', action="count", default=0, help='verbosity, -vv and -vvv are valid')
     args = cmdline_parser.parse_args()
 
-    jbo_parser.parse(args.words)
+    jbo_parser = LojbanParser()
+    jbo_parser.verbose = args.verbose
+    parsed = jbo_parser.parse(args.words)
+
+    from JBO_Translator import JBOTranslator
+
+    print JBOTranslator().translate(parsed)
+
+
