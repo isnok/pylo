@@ -13,25 +13,10 @@ class Parser(bison.BisonParser):
 
 
     def on_all(self, target, option, names, values):
-        """all : chunks
-all : chunks
+        """all : text
+all : text
 """
         print "on_all: got %s %s %s %s" % (target, option, names, values)
-        return
-
-    def on_chunks(self, target, option, names, values):
-        """chunks : text PRIVATE_EOF_MARK
-chunks : text PRIVATE_EOF_MARK
-       | text error
-{ $$ = $1; yyclearin; }
-       | chunks text PRIVATE_EOF_MARK
-       | chunks text error
-{ fprintf(stderr, "Syntax error following text ending at line %d column %d\n",
-          @2.last_line, @2.last_column);
-  yyclearin;
-  $$ = new_node_2(CHUNKS, $1, $2); }
-"""
-        print "on_chunks: got %s %s %s %s" % (target, option, names, values)
         return
 
     def on_text(self, target, option, names, values):
@@ -357,29 +342,8 @@ sentence : terms CU free_seq bridi_tail
          | no_cu_sentence
          | observative_sentence
          | terms PRIVATE_START_GIHEK /* error */
-{
- fprintf(stderr, "Missing selbri before GIhA at line %d column %d\n",
-         @2.first_line, @2.first_column);
- error_advance(0);
- $$ = $1;
- YYERROR;
-}
          | terms PRIVATE_GIHEK_KE /* error */
-{
- fprintf(stderr, "Missing selbri before GIhA at line %d column %d\n",
-         @2.first_line, @2.first_column);
- error_advance(0);
- $$ = $1;
- YYERROR;
-}
          | terms PRIVATE_GIHEK_BO /* error */
-{
- fprintf(stderr, "Missing selbri before GIhA at line %d column %d\n",
-         @2.first_line, @2.first_column);
- error_advance(0);
- $$ = $1;
- YYERROR;
-}
 """
         print "on_sentence: got %s %s %s %s" % (target, option, names, values)
         return

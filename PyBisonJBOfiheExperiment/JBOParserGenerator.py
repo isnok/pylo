@@ -4,6 +4,7 @@ lexscript = "cm_scan.l"
 bisonfile = "rpc2x.y"
 
 outfile = "test.py"
+uncommented = "uncomm.y"
 
 tokens = []
 bison_code = []
@@ -14,7 +15,6 @@ for line in open(bisonfile, 'r').readlines():
         continue
     if line.strip().startswith("%token"):
         tokens.append(line.split().pop())
-        continue
     if not comment and line.strip().startswith("/*"):
         comment = True
     if not comment:
@@ -23,6 +23,8 @@ for line in open(bisonfile, 'r').readlines():
         comment = False
 
 print "Found %d tokens and %d lines of bison code." % (len(tokens), len(bison_code))
+
+open(uncommented, 'w').write("".join(bison_code))
 
 convert = []
 unparsed = []
@@ -64,6 +66,10 @@ class Parser(bison.BisonParser):
 p = Parser()
 '''
 ]
+
+print "Ignoring:"
+for line in unparsed:
+    print repr(line)
 
 
 print "Writing to %s." % outfile
