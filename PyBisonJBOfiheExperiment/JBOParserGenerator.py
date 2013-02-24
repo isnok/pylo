@@ -85,11 +85,9 @@ for line in convert:
     if rule:
         code += line
 
-
-
 open(outfile, "a").write(snips[2])
 
-print "Done."# snips[2]
+print "Done."
 
 
 '''JBOParser=JBOParser.py
