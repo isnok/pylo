@@ -26,6 +26,9 @@ def parse_gismu(line):
     valsi = line[:5].strip()
     line = line[5:]
 
+    if valsi in valsi_dict:
+        print "WARNING: Overwriting double translation of %r." % valsi
+
     rafsi = line[:14].strip().split()
     line = line[14:]
 
@@ -69,6 +72,9 @@ def parse_cmavo(line):
 
     valsi = line[:10].strip()
     line = line[10:]
+
+    if valsi in valsi_dict:
+        print "WARNING: Overwriting double translation of %r." % valsi
 
     clas = line[:9].strip().split()
     line = line[9:]
