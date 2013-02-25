@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 lexscript = "cm_scan.l"
-bisonfile = "rpc2x.y"
+bisonfile = "rpc2x_full_act.y"
 
 outfile = "test.py"
 uncommented = "uncomm.y"
@@ -17,6 +17,9 @@ for line in open(bisonfile, 'r').readlines():
         tokens.append(line.split().pop())
     if not comment and line.strip().startswith("/*"):
         comment = True
+    else:
+        if "/*" in line: # swallow inline comments (crude!)
+            line = line.split("/*")[0] + "\n"
     if not comment:
         bison_code.append(line)
     if comment and line.strip().endswith("*/"):

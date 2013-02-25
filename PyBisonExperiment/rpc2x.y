@@ -227,8 +227,26 @@ extern int last_tok_column;
 text<0> = [NAI ...] [CMENE ... # | (indicators & free ...)] [joik-jek] text-1
 */
 
+all : chunks
+    ;
+
+/*
 all : text
     ;
+*/
+
+/* This is an artifact of the error handling mechanism  - sometimes the parser will
+   reduce right out to the top rule which is hopeless */
+chunks : text PRIVATE_EOF_MARK
+       | text error
+{ $$ = $1; yyclearin; }
+       | chunks text PRIVATE_EOF_MARK
+       | chunks text error
+{ fprintf(stderr, "Syntax error following text ending at line %d column %d\n",
+          @2.last_line, @2.last_column);
+  yyclearin;
+  $$ = new_node_2(CHUNKS, $1, $2); }
+       ;
 
 
 text : NAI_seq CMENE_seq free_seq joik_opt_ke free_seq text_1
@@ -428,7 +446,7 @@ text_1C :         PRIVATE_I_BO I joik stag BO free_seq
 paragraphs<4> = paragraph [NIhO ... # paragraphs]
 */
 
-/* Rewrite <paragraphs> to make this left recursive important as there may be
+/* Rewrite <paragraphs> to make this left recursive : important as there may be
    lots of these in a text. */
 
 /*
@@ -582,8 +600,32 @@ sentence : terms CU free_seq bridi_tail
 /* The following are all artificial */
 
          | terms PRIVATE_START_GIHEK /* error */
+{
+ fprintf(stderr, "Missing selbri before GIhA at line %d column %d\n",
+         @2.first_line, @2.first_column);
+ error_advance(0);
+ $$ = $1;
+ YYERROR;
+}
+
          | terms PRIVATE_GIHEK_KE /* error */
+{
+ fprintf(stderr, "Missing selbri before GIhA at line %d column %d\n",
+         @2.first_line, @2.first_column);
+ error_advance(0);
+ $$ = $1;
+ YYERROR;
+}
+
          | terms PRIVATE_GIHEK_BO /* error */
+{
+ fprintf(stderr, "Missing selbri before GIhA at line %d column %d\n",
+         @2.first_line, @2.first_column);
+ error_advance(0);
+ $$ = $1;
+ YYERROR;
+}
+
          ;
 
 /* The IMPOSSIBLE_TOKEN branch won't ever match.  This allows the terms
@@ -2295,4 +2337,3 @@ NIhO_seq_free_seq : NIhO_seq free_seq
 NIhO_seq : NIhO_seq NIhO
          |          NIhO
          ;
-%%
