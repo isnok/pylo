@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """ Handy dandy helper funxions. """
 
 ##
@@ -22,19 +23,29 @@ def sanitize_input(inp):
     for c in kill_chars:
         string = string.replace(c, "")
 
-    string = string.replace("'", "\\'")
-    string = string.replace("h", "\\'")
+    string = string.replace("'", "\'")
+    string = string.replace("h", "\'")
     #string = string.lower()
 
     return string
 
 ##
-#  Execution helper (for jbofihe). no stdout :-(
+#  Execution helper (for jbofihe).
 ##
-from commandwrapper import WrapCommand
+
+import sh
+import sys
 
 def run_jbofihe(args, lojban):
     """ In order to pipe correctly we have to use two commandline wrappers. """
-    echo = WrapCommand("echo %s" % lojban)
-    cmd = WrapCommand("jbofihe %s" % args)
-    return cmd(echo)
+    try:
+        return sh.jbofihe(sh.echo(lojban), *args.split())
+    except Exception, e:
+        print "Got an error: %s" % type(e)
+        print "It reads:"
+        print e.message
+        print "The Exception vanishes in a puff of lojic."
+        sys.exit()
+    # IMO fabric has the most understandable syntax:
+    #cmd = "echo %s | jbofihe %s" % (lojban, args)
+    #return local(cmd, capture=True)

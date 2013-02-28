@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
 """ A wrapper for the jbofihe parser. """
 
@@ -9,7 +10,8 @@ class LojbanParser:
 
     """ A wrapper for jbofihe. """
 
-    verbose = 0
+    def __init__(self, args):
+        self.verbose = args.verbose
 
     def parse(self, inp):
 
@@ -38,13 +40,11 @@ class LojbanParser:
             def out_t(tree, indent=""):
                 fmt = ""
                 for n in tree:
-                    if type(n[1]) is str:
-                        fmt = "%s\n%s %s - %s" % (fmt, indent, n[0], n[1])
+                    if isinstance(n[1], list):
+                        newindent = indent + "  "
+                        fmt = "%s\n%s %s%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
                         continue
-                    newindent = indent + "  "
-                    fmt = "%s\n%s %s%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
-                    #newindent = indent + (" " * (1 + len(n[0])))
-                    #fmt = "%s\n%s %s\n%s %s" % (fmt, indent, n[0], indent, out_t(n[1], newindent))
+                    fmt = "%s\n%s %s - %s" % (fmt, indent, n[0], n[1])
                 return fmt
             print out_t(t_out)
 
@@ -102,17 +102,15 @@ if __name__ == "__main__":
 
     import argparse
     cmdline_parser = argparse.ArgumentParser(description='Process some lojban.')
-    cmdline_parser.add_argument('words', metavar='word', type=str, nargs='*', help='some lojban word',
+    cmdline_parser.add_argument('words', metavar='word', type=str, nargs='*', help='Some lojban text.',
             default="coi rodo .i mihe jbovla ke skami fanva kehe")
-    cmdline_parser.add_argument('--verbose', '-v', action="count", default=0, help='verbosity, -vv and -vvv are valid')
+    cmdline_parser.add_argument('--verbose', '-v', action="count", default=0, help='Verbosity, -vv and -vvv are valid.')
+    cmdline_parser.add_argument('--translate', '-t', action="store_true", default=False, help='Translate the parsed valsi.')
     args = cmdline_parser.parse_args()
 
-    jbo_parser = LojbanParser()
-    jbo_parser.verbose = args.verbose
+    jbo_parser = LojbanParser(args)
     parsed = jbo_parser.parse(args.words)
 
-    from JBO_Translator import JBOTranslator
-
-    print JBOTranslator().translate(parsed)
-
-
+    if args.translate:
+        from JBO_Translator import JBOTranslator
+        print JBOTranslator(args).translate(parsed)

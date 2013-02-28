@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
+from Wordlists import load_files
 from Wordlists import valsi_dict
 from Wordlists import rafsi_dict
 
@@ -20,6 +22,10 @@ def translate_valsi(word):
 
 class JBOTranslator:
 
+    def __init__(self, args):
+        load_files(args)
+        self.verbose = args.verbose
+
     def translate(self, tree, indent="", do_indent=False):
 
         def ignore(block):
@@ -31,6 +37,8 @@ class JBOTranslator:
 
         def pop_rafsi(valsi, rafsi_len):
             rafsi, rest = rafsi_dict[valsi[:rafsi_len]], valsi[rafsi_len:]
+            if not rest:
+                return (rafsi,)
             if rest[0] in "y'":
                 rest = rest[1:]
             if not rest:
@@ -45,7 +53,7 @@ class JBOTranslator:
 
         fmt = ""
         for block, words in tree:
-            if type(words) is str:
+            if not isinstance(words, list):
                 if " " in words:
                     words = words.split().pop(0)
                 if words == "i": # gr. is it a bug?
